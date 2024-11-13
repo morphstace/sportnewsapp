@@ -1,11 +1,15 @@
-<h1>Hello world!</h1>
+{% extends 'base.html' %}
 
-<p>This is my first webpage!!</p>
+{% block content %}
+    <h1>Hello world!</h1>
+
+    <p>This is my first webpage!!</p>
 
 
-{% for x in example_list %}
-    {{ x }}<br/>
-{% endfor %}
+    {% for x in example_list %}
+        {{ x }}<br/>
+    {% endfor %}
 
-<br><br/>
-{{example_list.1}}
+    <br><br/>
+    {{example_list.1}}
+{% endblock %}
