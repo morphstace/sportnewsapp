@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% for message in get_flashed_messages() %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+       {{ message }}
+       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  
+{% endfor %}
+
+<h1>Dashboard</h1> <br/>
+
+<div class="card" style="width: 25rem;">
+    <img src="..." class="card-img-top" alt="...">
+    <div class="card-body">
+      <h5 class="card-title">{{current_user.name}}</h5>
+      <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+    </div>
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item"><strong>Username: </strong>{{current_user.username}}</li>
+      <li class="list-group-item"><strong>Email: </strong> {{current_user.email}}</li>
+      <li class="list-group-item"><strong>Date registred: </strong>{{current_user.date_added}}</li>
+    </ul>
+    <div class="card-body">
+      <a href="{{url_for('auth.logout')}}" class="btn btn-warning btn-small">Logout</a>
+      <a href="{{ url_for('users.delete', id=current_user.id)}}" class="btn btn-danger btn-small">Delete account</a>
+    </div>
+  </div>
+  <br/>
+<div class="card">
+  <div class="card-header">
+    <strong>Update profile</strong>
+  </div>
+  <div class="card-body">
+    <form action ="/dashboard" method="POST">
+      {{ form.hidden_tag() }}
+      {{ form.name.label }}
+      {{ form.name(class="form-control", value = name_to_update.name) }}
+      {{ form.username.label }}
+      {{ form.username(class="form-control", value = name_to_update.username) }}
+      {{ form.email.label }}
+      {{ form.email(class="form-control", value = name_to_update.email) }}
+      <br/>
+      {{ form.submit(class="btn btn-primary") }}
+  </form>
+  </div>
+</div>
+
+
+{% endblock %}
