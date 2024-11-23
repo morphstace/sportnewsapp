@@ -10,11 +10,9 @@
   
 {% endfor %}
 
-{% if name %}
-    <h1> Update User </h1>
-{% else %}
     <h1> Update User</h1>
     <br/>
+    {%if id == current_user.id%}
     <form action ="/update/{{ name_to_update.id }}" method="POST">
         {{ form.hidden_tag() }}
         {{ form.name.label }}
@@ -28,6 +26,13 @@
         <br/>
         {{ form.submit(class="btn btn-primary") }}
     </form>
+    {%else%}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        You can't update this user!
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+        </button>
+    </div>
+    <h2>ACCES DENIED</h2>
+    {%endif%}
 <br/>
-{% endif %}
 {% endblock %}

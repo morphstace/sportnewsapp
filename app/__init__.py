@@ -6,7 +6,7 @@ from app.extensions import db, login_manager, migrate
 
 def create_app():
     app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://admin:password@localhost/users'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://admin:password123@localhost/users'
     app.config['SECRET_KEY'] = "seckey"
     
     # Inizializza estensioni

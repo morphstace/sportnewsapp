@@ -12,13 +12,14 @@
 
     <div>
     <h1>{{ new.title}}</h1>
-    {{ new.author}}<br/>
+    By: {{ new.poster.username}}<br/>
     {{ new.date_posted}}<br/>
     {{ new.content}}<br/>
     </div>
     <br/>
     <a href="{{ url_for('news.news') }}" class="btn btn-outline-secondary btn-sm">Back to News</a>
-    <a href="{{ url_for('news.edit_new', id=new.id) }}" class="btn btn-outline-secondary btn-sm">Edit News</a>
-    <a href="{{ url_for('news.delete_new', id=new.id) }}" class="btn btn-outline-danger btn-sm">Delete News</a>
-
+    {%if new.poster_id == current_user.id%}
+        <a href="{{ url_for('news.edit_new', id=new.id) }}" class="btn btn-outline-secondary btn-sm">Edit News</a>
+        <a href="{{ url_for('news.delete_new', id=new.id) }}" class="btn btn-outline-danger btn-sm">Delete News</a>
+    {%endif%}
 {% endblock %}

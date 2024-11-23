@@ -27,8 +27,14 @@ def delete(id):
 
 #Update DB record
 @bp.route('/update/<int:id>', methods =['GET','POST'])
+@login_required
 def update(id):
     form = UserForm()
+    ## preventing modification from other user
+    if id != current_user.id:
+        return render_template("update.html",
+                form = form,
+                name_to_update = Users.query.get_or_404(current_user.id), id=current_user.id)
     name_to_update = Users.query.get_or_404(id)
     if request.method == "POST":
         name_to_update.name = request.form['name']
@@ -39,12 +45,12 @@ def update(id):
             flash("User updated successfully!")
             return render_template("update.html",
                 form = form,
-                name_to_update = name_to_update)
+                name_to_update = name_to_update, id=id)
         except:
             flash("Error in updating user.")
     return render_template("update.html",
                 form = form,
-                name_to_update = name_to_update)
+                name_to_update = name_to_update, id=id)
 
 @bp.route('/user/<name>')
 def user(name):

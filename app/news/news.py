@@ -1,8 +1,8 @@
 from app.news import bp
 from flask import render_template, redirect, url_for, flash
 from app.models import Users, News
-from app.forms import NewsForm, UserForm, PasswordForm
-from flask_login import login_required
+from app.forms import NewsForm, UserForm, PasswordForm, SearchForm
+from flask_login import login_required, current_user
 from werkzeug.security import check_password_hash
 from app.extensions import db
 from datetime import date
@@ -25,18 +25,19 @@ def edit_new(id):
     form = NewsForm()
     if form.validate_on_submit():
         new.title = form.title.data
-        new.author = form.author.data
         new.slug = form.slug.data
         new.content = form.content.data
         db.session.add(new)
         db.session.commit()
         flash("Update successfull!")
         return redirect(url_for('news.new', id=new.id))
-    form.title.data = new.title
-    form.author.data = new.author
-    form.slug.data = new.slug
-    form.content.data = new.content
-    return render_template('edit_new.html', form=form)
+    if current_user.id == new.poster_id:
+        form.title.data = new.title
+        form.slug.data = new.slug
+        form.content.data = new.content
+        return render_template('edit_new.html', form=form)
+    flash("You are not authorized to edit.")
+    return render_template('new.html', new=new)
     
 
 @bp.route('/add-news', methods=['GET','POST'])
@@ -44,11 +45,11 @@ def edit_new(id):
 def add_news():
     form = NewsForm()
     if form.validate_on_submit():
+        poster = current_user.id
         news = News(title=form.title.data, content=form.content.data, 
-            author=form.author.data, slug=form.slug.data)
+            poster_id=poster, slug=form.slug.data)
         form.title.data=''
         form.content.data=''
-        form.author.data=''
         form.slug.data=''
 
         db.session.add(news)
@@ -61,14 +62,19 @@ def add_news():
 @login_required
 def delete_new(id):
     new_to_del = News.query.get_or_404(id)
-    try:
-        db.session.delete(new_to_del)
-        db.session.commit()
-        flash("News deleted successfully!")
-        return redirect(url_for('news.news'))
-    except:
-        flash("Something went wrong, try again.")
-        return render_template('new.html', new=new_to_del)
+    id = current_user.id
+    if id == new_to_del.poster.id:
+        try:
+            db.session.delete(new_to_del)
+            db.session.commit()
+            flash("News deleted successfully!")
+            return redirect(url_for('news.news'))
+        except:
+            flash("Something went wrong, try again.")
+            return render_template('new.html', new=new_to_del)
+    flash("You are not authorized.")
+    return render_template('new.html', new=new_to_del)
+
 
 
 @bp.route('/news')
@@ -77,6 +83,21 @@ def news():
     news = News.query.order_by(News.date_posted)
     return render_template("news.html", news=news)
 
+@bp.route('/search', methods=['POST'])
+def search():
+    form = SearchForm()
+    news = News.query
+    if form.validate_on_submit():
+        new.searched = form.searched.data
+        news = news.filter(News.content.like('%'+new.searched+'%'))
+        news = news.order_by(News.title).all()
+        return render_template("search.html", form=form,
+            searched= new.searched, news=news)
+
+@bp.context_processor
+def base():
+    form = SearchForm()
+    return dict(form=form)
 
 @bp.route('/date')
 def get_current_date():

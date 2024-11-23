@@ -15,7 +15,7 @@
 {% for n in news %}
     <div class="shadow p-3 mb-5 bg-body rounded">
     <a href="{{url_for('news.new',id=n.id)}}"><h2>{{ n.title}}</h2></a>
-    {{ n.author}}<br/>
+    By: {{ n.poster.username}}<br/>
     {{ n.date_posted}}<br/>
     {{ n.content}}<br/><br/>
     </div>

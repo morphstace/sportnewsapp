@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+    <br/>
+    <p>{{searched}}</p>
+    <br/>
+    {%for new in news%}
+        <a href="{{url_for('news.new',id=new.id)}}" >{{new.title}}</a><br/>
+    {%endfor%}
+
+
+
+{% endblock%}
