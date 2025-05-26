@@ -13,11 +13,12 @@ class LoginForm(FlaskForm):
 #News Form
 class NewsForm(FlaskForm):
     title = StringField("Title", validators=[DataRequired()])
-    #content = StringField("Content", validators=[DataRequired()], widget=TextArea())
-    content = CKEditorField("Content", validators=[DataRequired()])
+    content = CKEditorField("Content")
     author = StringField("Author")
     slug = StringField("Slug", validators=[DataRequired()])
     submit = SubmitField("Submit")
+    url = StringField("URL", validators=[DataRequired()])
+
 
 #Create a Form Class
 class UserForm(FlaskForm):

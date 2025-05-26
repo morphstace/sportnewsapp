@@ -1,73 +1,46 @@
 from app.news import bp
-from flask import render_template, redirect, url_for, flash
+from flask import render_template, redirect, url_for, flash, request
 from app.models import Users, News
 from app.forms import NewsForm, UserForm, PasswordForm, SearchForm
 from flask_login import login_required, current_user
 from werkzeug.security import check_password_hash
 from app.extensions import db
 from datetime import date
-import google.generativeai as genai
-import os
+import google.genai as genai
+import os, requests
+from bs4 import BeautifulSoup
 
-genai.configure(api_key=os.getenv('GOOGLE_API_KEY'))
+client = genai.Client(api_key=os.getenv('GOOGLE_API_KEY'))
 
 def text_sumarization(text):
     """Function to summarize text using Google Generative AI."""
-    response = genai.generate_text(
-        model='gemini-1.5-flash',
-        prompt=f"Riassumi il seguente testo:\n\n{text}",
-        min_output_tokens=500,
-        max_output_tokens=1000,
-        temperature=0.2
+    response = client.models.generate_content(
+        model='gemini-2.0-flash',
+        contents=f"Fornisci un riassunto conciso del seguente testo:\n\n{text}"
+        +"La sintesi deve essere scritta senza tradurre il testo originale e deve avere tra 500 e 1000 caratteri."
     )
     return response.text.strip() if response else "Nessun riassunto disponibile."
 
 def text_validation(text):
-    if not (grammar_check(text)):
-        response = genai.generate_text(
-            model='gemini-1.5-flash',
-            prompt=f"Correggi grammaticalmente il seguente testo:\n\n{text}",
-            min_output_tokens=500,
-            max_output_tokens=1000,
-            temperature=0.2
-        )
-        return response.text.strip() if response else text
+    """Function to validate text grammar using Google Generative AI."""
+    """Corregge gli errori grammaticali nel testo utilizzando Gemini."""
+    response = client.models.generate_content(
+        model='gemini-2.0-flash',
+        contents=f"Correggi eventuali errori grammaticali nel seguente testo e restituisci il testo corretto:\n\n{text}."+
+        "Rispondi solo con il testo corretto, senza spiegazioni.")
+    return response.text if response else "Nessun testo corretto disponibile."
 
-def grammar_check(text):
-    """Restituisce True se il testo è grammaticalmente corretto secondo Gemini, altrimenti False."""
-    response = genai.generate_text(
-        model='gemini-1.5-flash',
-        prompt=f"Rispondi solo con 'True' o 'False'. Il seguente testo è grammaticalmente corretto?\n\n{text}",
-        min_output_tokens=1,
-        max_output_tokens=5,
-        temperature=0.1
-    )
-    if response and response.text:
-        answer = response.text.strip().lower()
-        return answer.startswith('true')
-    return False
-
-def generate_labels(text, num_labels=5):
-    """
-    Usa Gemini per generare un certo numero di label (parole chiave) per classificare una news.
-    :param text: Il testo della news.
-    :param num_labels: Numero di label da generare.
-    :return: Lista di label.
-    """
-    response = genai.generate_text(
-        model='gemini-1.5-flash',
-        prompt=(
-            f"Estrai {num_labels} parole chiave (label) rilevanti per classificare la seguente notizia. "
-            "Rispondi solo con una lista separata da virgole, senza numeri o spiegazioni:\n\n"
-            f"{text}"
-        ),
-        max_output_tokens=10,
-        temperature=0.3
-    )
-    if response and response.text:
-        # Pulisce e restituisce la lista di label
-        return [label.strip() for label in response.text.strip().split(',') if label.strip()]
-    return []
+def text_retrieval(url):
+    """Function to retrieve text from a URL"""
+    res = requests.get(url)
+    if res.status_code == 200:
+        soup = BeautifulSoup(res.text, 'html.parser')
+        paragraphs = soup.find_all('p')
+        text = ' '.join([para.get_text() for para in paragraphs])
+        print(text)
+        return text.strip()
+    print("Error retrieving text from URL:", res.status_code)
+    return "Nessun testo recuperato dalla URL."
 
 @bp.route('/')
 def index():
@@ -106,17 +79,26 @@ def edit_new(id):
 def add_news():
     form = NewsForm()
     if form.validate_on_submit():
-        poster = current_user.id
-        news = News(title=form.title.data, content=form.content.data, 
+        action = request.form.get('action')
+        if action == 'sintetize':
+            summarized_text = text_sumarization(form.content.data)
+            form.content.data = summarized_text
+        elif action == 'correct':
+            validated_text = text_validation(form.content.data)
+            form.content.data = validated_text
+        elif action == 'retrieve':
+            retrieved_text = text_retrieval(form.url.data)
+            form.content.data = retrieved_text
+        else:
+            poster = current_user.id
+            news = News(title=form.title.data, content=form.content.data,
             poster_id=poster, slug=form.slug.data)
-        form.title.data=''
-        form.content.data=''
-        form.slug.data=''
-
-        db.session.add(news)
-        db.session.commit()
-
-        flash("News submitted successfully!")
+            form.title.data = ''
+            form.content.data = ''
+            form.slug.data = ''
+            db.session.add(news)
+            db.session.commit()
+            flash("News submitted successfully!")
     return render_template("add_news.html", form=form)
 
 @bp.route('/news/delete/<int:id>')

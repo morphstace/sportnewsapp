@@ -23,9 +23,23 @@
     {{ form.content.label(class="form-label") }}
     {{ form.content(class="form-control", rows="5") }}
     <br/>
+    {{ form.url.label(class="form-label") }}
+    {{ form.url(class="form-control") }}
+    <br/>
     {{ form.submit(class="btn btn-primary") }}
+    <button name="action" value="sintetize" class="btn btn-secondary">Sintesi</button>
+    <button name="action" value="correct" class="btn btn-secondary">Correggi</button>
+    <button name="action" value="retrieve" class="btn btn-secondary">Ricava da URL</button>
 </form>
 {{ ckeditor.load() }}
 {{ ckeditor.config(name='content') }}
+
+{% if generated_text %}
+<   hr>
+    <h2>Generated Text</h2>
+    <form>
+        <textarea class="form-control" rows="5" readonly>{{ generated_text }}</textarea>
+    </form>
+{% endif %}
 
 {% endblock %}
