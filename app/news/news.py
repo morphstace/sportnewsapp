@@ -6,7 +6,68 @@ from flask_login import login_required, current_user
 from werkzeug.security import check_password_hash
 from app.extensions import db
 from datetime import date
+import google.generativeai as genai
+import os
 
+genai.configure(api_key=os.getenv('GOOGLE_API_KEY'))
+
+def text_sumarization(text):
+    """Function to summarize text using Google Generative AI."""
+    response = genai.generate_text(
+        model='gemini-1.5-flash',
+        prompt=f"Riassumi il seguente testo:\n\n{text}",
+        min_output_tokens=500,
+        max_output_tokens=1000,
+        temperature=0.2
+    )
+    return response.text.strip() if response else "Nessun riassunto disponibile."
+
+def text_validation(text):
+    if not (grammar_check(text)):
+        response = genai.generate_text(
+            model='gemini-1.5-flash',
+            prompt=f"Correggi grammaticalmente il seguente testo:\n\n{text}",
+            min_output_tokens=500,
+            max_output_tokens=1000,
+            temperature=0.2
+        )
+        return response.text.strip() if response else text
+
+def grammar_check(text):
+    """Restituisce True se il testo è grammaticalmente corretto secondo Gemini, altrimenti False."""
+    response = genai.generate_text(
+        model='gemini-1.5-flash',
+        prompt=f"Rispondi solo con 'True' o 'False'. Il seguente testo è grammaticalmente corretto?\n\n{text}",
+        min_output_tokens=1,
+        max_output_tokens=5,
+        temperature=0.1
+    )
+    if response and response.text:
+        answer = response.text.strip().lower()
+        return answer.startswith('true')
+    return False
+
+def generate_labels(text, num_labels=5):
+    """
+    Usa Gemini per generare un certo numero di label (parole chiave) per classificare una news.
+    :param text: Il testo della news.
+    :param num_labels: Numero di label da generare.
+    :return: Lista di label.
+    """
+    response = genai.generate_text(
+        model='gemini-1.5-flash',
+        prompt=(
+            f"Estrai {num_labels} parole chiave (label) rilevanti per classificare la seguente notizia. "
+            "Rispondi solo con una lista separata da virgole, senza numeri o spiegazioni:\n\n"
+            f"{text}"
+        ),
+        max_output_tokens=10,
+        temperature=0.3
+    )
+    if response and response.text:
+        # Pulisce e restituisce la lista di label
+        return [label.strip() for label in response.text.strip().split(',') if label.strip()]
+    return []
 
 @bp.route('/')
 def index():

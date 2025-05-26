@@ -34,18 +34,20 @@ def register():
     name = None
     form = UserForm()
     if form.validate_on_submit():
-        user = Users.query.filter_by(email=form.email.data).first()
-        if user is None:
+        user_by_mail = Users.query.filter_by(email=form.email.data).first()
+        user_by_name = Users.query.filter_by(username=form.username.data).first()
+        if user_by_mail is None and user_by_name is None:
             pw_hash = generate_password_hash(form.password_hash.data, "pbkdf2:sha256")
             user = Users(name=form.name.data, username=form.username.data, 
                 email=form.email.data, password_hash=pw_hash)
             db.session.add(user)
             db.session.commit()
+            flash("User registred successfully!")
+        else: flash("E-mail or username already in use!")
         name = form.name.data
         form.name.data = ''
         form.username.data = ''
         form.email.data = ''
-        flash("User registred successfully!")
     our_users = Users.query.order_by(Users.date_added)
     return render_template("register.html",
          form = form, name=name,

@@ -2,6 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, EqualTo, Email
 from wtforms.widgets import TextArea
+from flask_ckeditor import CKEditorField
 
 #login form
 class LoginForm(FlaskForm):
@@ -12,7 +13,8 @@ class LoginForm(FlaskForm):
 #News Form
 class NewsForm(FlaskForm):
     title = StringField("Title", validators=[DataRequired()])
-    content = StringField("Content", validators=[DataRequired()], widget=TextArea())
+    #content = StringField("Content", validators=[DataRequired()], widget=TextArea())
+    content = CKEditorField("Content", validators=[DataRequired()])
     author = StringField("Author")
     slug = StringField("Slug", validators=[DataRequired()])
     submit = SubmitField("Submit")

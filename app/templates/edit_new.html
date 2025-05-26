@@ -24,6 +24,8 @@
             <br/>
             {{ form.submit(class="btn btn-primary") }}
         </form>
+        {{ ckeditor.load() }}
+        {{ ckeditor.config(name='content') }}
     </div>
     <br/>
     <a href="{{ url_for('news.news') }}" class="btn btn-outline-secondary btn-sm">Back to News</a>

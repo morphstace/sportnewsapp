@@ -14,7 +14,7 @@
     <h1>{{ new.title}}</h1>
     By: {{ new.poster.username}}<br/>
     {{ new.date_posted}}<br/>
-    {{ new.content}}<br/>
+    {{ new.content|safe}}<br/>
     </div>
     <br/>
     <a href="{{ url_for('news.news') }}" class="btn btn-outline-secondary btn-sm">Back to News</a>

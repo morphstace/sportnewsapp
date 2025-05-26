@@ -17,7 +17,7 @@
     <a href="{{url_for('news.new',id=n.id)}}"><h2>{{ n.title}}</h2></a>
     By: {{ n.poster.username}}<br/>
     {{ n.date_posted}}<br/>
-    {{ n.content}}<br/><br/>
+    {{ n.content|safe}}<br/><br/>
     </div>
 {% endfor %}
 
