@@ -2,22 +2,22 @@ from app.users import bp
 from flask import render_template, flash, request
 from flask_login import login_required, current_user
 from app.models import User
-from app.forms import UserForm
+from app.forms import UserForm, RegistrationForm
 from app.extensions import db
 
 @bp.route('/delete/<int:id>')
 def delete(id):
     user_to_delete = User.query.get_or_404(id)
-    form = UserForm()
+    form = RegistrationForm()
     name = None
     try:
         db.session.delete(user_to_delete)
         db.session.commit()
         flash("User deleted successfully.")
         our_users = User.query.order_by(User.date_added)
-        return render_template("add_user.html",
+        return render_template("register.html",
             form=form, name=name, our_users=our_users)
-    except:
+    except Exception:
         flash("Exception occured!")
     our_users = User.query.order_by(User.date_added)
     return render_template("register.html",

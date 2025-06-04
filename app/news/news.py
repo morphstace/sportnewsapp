@@ -109,7 +109,6 @@ def add_news():
             retrieved_text = text_retrieval(form.url.data)
             form.content.data = retrieved_text
         elif action == None:
-            poster = current_user.id
             image_file = form.image.data
             image_filename = None
             if image_file:
@@ -120,7 +119,7 @@ def add_news():
                 image_file.save(os.path.join('app','static', image_path))
                 image_filename = image_path
             news = New(title=form.title.data, content=form.content.data,
-            poster_id=poster, slug=form.slug.data, image=image_filename, poster=current_user)
+            poster_id=current_user.id, slug=form.slug.data, image=image_filename, poster=current_user)
             form.title.data = ''
             form.content.data = ''
             form.slug.data = ''
@@ -138,7 +137,7 @@ def add_news():
 def delete_new(id):
     new_to_del = New.query.get_or_404(id)
     user_id = current_user.id
-    poster_id = new_to_del.poster.user_id
+    poster_id = new_to_del.poster.id
     #if 1==1:
     if user_id == poster_id:
         try:

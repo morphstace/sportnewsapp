@@ -10,6 +10,7 @@ from app.extensions import db
 def login():
     form = LoginForm()
     if form.validate_on_submit():
+        print("validating "+ form.username.data)
         user = User.query.filter_by(username=form.username.data).first()
         if user and check_password_hash(user.password_hash, form.password.data):
             print(login_user(user))

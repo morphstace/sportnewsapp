@@ -4,11 +4,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from app.extensions import db
 import uuid
 
-new_poster = db.Table('new_poster',
-    db.Column('news_id', db.Integer, db.ForeignKey('new.id')),
-    db.Column('user_id', db.Integer, db.ForeignKey('user.id'))
-)
-
 #Create a news model
 class New(db.Model):
     __tablename__ = 'new'
@@ -19,8 +14,8 @@ class New(db.Model):
     date_posted = db.Column(db.DateTime, default=datetime.utcnow)
     slug = db.Column(db.String(200))
     #foreign key to user
-    poster_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    poster = db.relationship('User', secondary=new_poster, backref='news')
+    poster_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    poster = db.relationship('User', backref='news')
 
 
 # Create a many-to-many relationship table for roles and users

@@ -1,13 +1,58 @@
 h1 {
-    color: lightseagreen;
+    color: #a2c8e8;
     font-size: 60px;
 }
 
+h2, h3, h4, h5, h6, p, span, label, li, td, th {
+    color: #a2c8e8 !important;
+}
+
 body {
-    background: #f4f4f4;
+    background-color: #333333 !important; /* blu scuro */
+    color: #a2c8e8 !important;           /* testo chiaro */
+}
+.navbar, .card, .modal-content {
+    background-color: #1b263b !important; /* blu più chiaro per elementi */
+}
+a, .btn-link {
+    color: #3498db !important; /* blu acceso per link */
+}
+.btn-primary {
+    background-color: #274690 !important;
+    border-color: #274690 !important;
 }
 
 #demo{
     font-size: 20px;
     color: darkcyan;
+}
+
+.logo-border {
+    border: 2px solid #97f631 !important;
+}
+
+.heading-color {
+    color: #97f631 !important;
+}
+
+.my-register-form {
+    background-color: #f4f4f4 !important;
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 4px 24px rgba(39,70,144,0.15);
+}
+
+.my-register-form label {
+    color: #2f4f4f !important;
+}
+
+.my-register-form .form-control {
+    background-color: #e0e1dd;
+    border: 1px solid #274690;
+    color: #274690;
+}
+
+.my-register-form .btn-primary {
+    background-color: #274690;
+    border-color: #274690;
 }

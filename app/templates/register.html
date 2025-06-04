@@ -13,9 +13,9 @@
 {% if name %}
     <h1> Hello {{ name }}</h1>
 {% else %}
-    <h1> Users List:</h1>
+    <h1> Registrazione</h1>
     <br/>
-    <div class="shadow p-3 bg-body rounded">
+    <div class="shadow p-3 bg-body rounded my-register-form">
     <form method="POST">
         {{ form.hidden_tag() }}
         {{ form.name.label }}
