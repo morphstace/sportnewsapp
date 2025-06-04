@@ -1,8 +1,19 @@
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileAllowed
 from wtforms import StringField, PasswordField, SubmitField
-from wtforms.validators import DataRequired, EqualTo, Email
+from wtforms.validators import DataRequired, EqualTo, Email, Length
 from wtforms.widgets import TextArea
 from flask_ckeditor import CKEditorField
+
+
+class RegistrationForm(FlaskForm):
+    name = StringField("Name", validators=[DataRequired(), Length(min=2, max=30)])
+    username = StringField("Username", validators=[DataRequired(), Length(min=4, max=20)])
+    password = PasswordField("Password", validators=[DataRequired(), Length(min=6, max=20)])
+    password_confirm = PasswordField("Confirm Password", validators=[DataRequired(), EqualTo('password', message='Passwords must match.')])
+    email = StringField("Email", validators=[DataRequired(), Email()])
+    submit = SubmitField("Register")
+
 
 #login form
 class LoginForm(FlaskForm):
@@ -17,7 +28,8 @@ class NewsForm(FlaskForm):
     author = StringField("Author")
     slug = StringField("Slug", validators=[DataRequired()])
     submit = SubmitField("Submit")
-    url = StringField("URL", validators=[DataRequired()])
+    url = StringField("URL")
+    image = FileField("Image", validators=[FileAllowed(['jpg', 'png', 'jpeg'])])
 
 
 #Create a Form Class

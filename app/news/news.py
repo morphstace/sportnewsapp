@@ -1,6 +1,6 @@
 from app.news import bp
 from flask import render_template, redirect, url_for, flash, request
-from app.models import Users, News
+from app.models import User, New
 from app.forms import NewsForm, UserForm, PasswordForm, SearchForm
 from flask_login import login_required, current_user
 from werkzeug.security import check_password_hash
@@ -9,6 +9,8 @@ from datetime import date
 import google.genai as genai
 import os, requests
 from bs4 import BeautifulSoup
+from werkzeug.utils import secure_filename
+import uuid
 
 client = genai.Client(api_key=os.getenv('GOOGLE_API_KEY'))
 
@@ -49,26 +51,43 @@ def index():
 
 @bp.route('/news/<int:id>')
 def new(id):
-    new = News.query.get_or_404(id)
+    new = New.query.get_or_404(id)
     return render_template('new.html', new=new)
 
 @bp.route('/news/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 def edit_new(id):
-    new = News.query.get_or_404(id)
+    new = New.query.get_or_404(id)
     form = NewsForm()
+    title = new.title
+    slug = new.slug
+    content = new.content
     if form.validate_on_submit():
-        new.title = form.title.data
-        new.slug = form.slug.data
-        new.content = form.content.data
-        db.session.add(new)
-        db.session.commit()
-        flash("Update successfull!")
-        return redirect(url_for('news.new', id=new.id))
+        action = request.form.get('action')
+        if action == 'sintetize':
+            summarized_text = text_sumarization(form.content.data)
+            content = summarized_text
+            title = form.title.data
+            slug = form.slug.data
+        elif action == 'correct':
+            validated_text = text_validation(form.content.data)
+            content = validated_text
+            title = form.title.data
+            slug = form.slug.data
+        elif action == None:
+            new.title = form.title.data
+            new.slug = form.slug.data
+            new.content = form.content.data
+            db.session.add(new)
+            db.session.commit()
+            flash("Update successful!")
+            return redirect(url_for('news.new', id=new.id))
+        else:
+            flash("Invalid action. Please try again.")
     if current_user.id == new.poster_id:
-        form.title.data = new.title
-        form.slug.data = new.slug
-        form.content.data = new.content
+        form.title.data = title
+        form.slug.data = slug
+        form.content.data = content
         return render_template('edit_new.html', form=form)
     flash("You are not authorized to edit.")
     return render_template('new.html', new=new)
@@ -89,24 +108,39 @@ def add_news():
         elif action == 'retrieve':
             retrieved_text = text_retrieval(form.url.data)
             form.content.data = retrieved_text
-        else:
+        elif action == None:
             poster = current_user.id
-            news = News(title=form.title.data, content=form.content.data,
-            poster_id=poster, slug=form.slug.data)
+            image_file = form.image.data
+            image_filename = None
+            if image_file:
+                filename = secure_filename(image_file.filename)
+                unique_name = f"{uuid.uuid4().hex}_{filename}"
+                image_path = os.path.join('uploads', unique_name)
+                os.makedirs(os.path.dirname(os.path.join('app', 'static', image_path)), exist_ok=True)
+                image_file.save(os.path.join('app','static', image_path))
+                image_filename = image_path
+            news = New(title=form.title.data, content=form.content.data,
+            poster_id=poster, slug=form.slug.data, image=image_filename, poster=current_user)
             form.title.data = ''
             form.content.data = ''
             form.slug.data = ''
+            form.image.data = None
             db.session.add(news)
             db.session.commit()
             flash("News submitted successfully!")
+        else:
+            flash("Invalid action. Please try again.")
+            return render_template("add_news.html", form=form)
     return render_template("add_news.html", form=form)
 
 @bp.route('/news/delete/<int:id>')
 @login_required
 def delete_new(id):
-    new_to_del = News.query.get_or_404(id)
-    id = current_user.id
-    if id == new_to_del.poster.id:
+    new_to_del = New.query.get_or_404(id)
+    user_id = current_user.id
+    poster_id = new_to_del.poster.user_id
+    #if 1==1:
+    if user_id == poster_id:
         try:
             db.session.delete(new_to_del)
             db.session.commit()
@@ -123,17 +157,17 @@ def delete_new(id):
 @bp.route('/news')
 def news():
     #grab all news from db
-    news = News.query.order_by(News.date_posted)
+    news = New.query.order_by(New.date_posted)
     return render_template("news.html", news=news)
 
 @bp.route('/search', methods=['POST'])
 def search():
     form = SearchForm()
-    news = News.query
+    news = New.query
     if form.validate_on_submit():
         new.searched = form.searched.data
-        news = news.filter(News.content.like('%'+new.searched+'%'))
-        news = news.order_by(News.title).all()
+        news = news.filter(New.content.like('%'+new.searched+'%'))
+        news = news.order_by(New.title).all()
         return render_template("search.html", form=form,
             searched= new.searched, news=news)
 
@@ -189,7 +223,7 @@ def test_pw():
         form.email.data = ''
         form.password_hash.data = ''
         #index user by email
-        pw_to_check = Users.query.filter_by(email=email).first()
+        pw_to_check = User.query.filter_by(email=email).first()
         #check hashed pw
         passed = check_password_hash(pw_to_check.password_hash, password)
     

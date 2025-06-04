@@ -1,7 +1,11 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>Hello world!</h1>
+    <h1>Benvenuto in Sportnewsapp!</h1>
 
-    <p>This is my first webpage!!</p>
+    <p>Questa applicazione ti permette di aggiungere ed editare notizie utilizzando
+        l'intelligenza artificiale Gemini di Google.</p>
+    <p>Per iniziare, puoi visitare la sezione <a href="{{ url_for('news.index') }}">Notizie</a> per vedere le ultime notizie o
+        <a href="{{ url_for('news.add_news') }}">aggiungere una nuova notizia</a>.</p>
+    </p>
 {% endblock %}

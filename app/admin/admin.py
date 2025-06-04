@@ -8,3 +8,6 @@ from flask_login import login_required
 def admin():
     form = UserForm()
     return render_template("admin.html", form=form)
+
+
+

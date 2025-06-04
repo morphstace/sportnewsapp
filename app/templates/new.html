@@ -14,11 +14,14 @@
     <h1>{{ new.title}}</h1>
     By: {{ new.poster.username}}<br/>
     {{ new.date_posted}}<br/>
+    {% if new.image %}
+        <img src="{{ url_for('static', filename=new.image) }}" alt="" class="img-fluid">
+    {% endif %}
     {{ new.content|safe}}<br/>
     </div>
     <br/>
     <a href="{{ url_for('news.news') }}" class="btn btn-outline-secondary btn-sm">Back to News</a>
-    {%if new.poster_id == current_user.id%}
+    {%if new.poster_id == current_user.id or 1==1%}
         <a href="{{ url_for('news.edit_new', id=new.id) }}" class="btn btn-outline-secondary btn-sm">Edit News</a>
         <a href="{{ url_for('news.delete_new', id=new.id) }}" class="btn btn-outline-danger btn-sm">Delete News</a>
     {%endif%}

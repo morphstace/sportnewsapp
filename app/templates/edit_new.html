@@ -23,6 +23,8 @@
             {{ form.content(class="form-control", rows="5") }}
             <br/>
             {{ form.submit(class="btn btn-primary") }}
+            <button name="action" value="sintetize" class="btn btn-secondary">Sintesi</button>
+            <button name="action" value="correct" class="btn btn-secondary">Correggi</button>
         </form>
         {{ ckeditor.load() }}
         {{ ckeditor.config(name='content') }}

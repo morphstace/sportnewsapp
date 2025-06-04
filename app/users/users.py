@@ -1,25 +1,25 @@
 from app.users import bp
 from flask import render_template, flash, request
 from flask_login import login_required, current_user
-from app.models import Users
+from app.models import User
 from app.forms import UserForm
 from app.extensions import db
 
 @bp.route('/delete/<int:id>')
 def delete(id):
-    user_to_delete = Users.query.get_or_404(id)
+    user_to_delete = User.query.get_or_404(id)
     form = UserForm()
     name = None
     try:
         db.session.delete(user_to_delete)
         db.session.commit()
         flash("User deleted successfully.")
-        our_users = Users.query.order_by(Users.date_added)
+        our_users = User.query.order_by(User.date_added)
         return render_template("add_user.html",
             form=form, name=name, our_users=our_users)
     except:
         flash("Exception occured!")
-    our_users = Users.query.order_by(Users.date_added)
+    our_users = User.query.order_by(User.date_added)
     return render_template("register.html",
         name=name,
         our_users=our_users,
@@ -34,8 +34,8 @@ def update(id):
     if id != current_user.id:
         return render_template("update.html",
                 form = form,
-                name_to_update = Users.query.get_or_404(current_user.id), id=current_user.id)
-    name_to_update = Users.query.get_or_404(id)
+                name_to_update = User.query.get_or_404(current_user.id), id=current_user.id)
+    name_to_update = User.query.get_or_404(id)
     if request.method == "POST":
         name_to_update.name = request.form['name']
         name_to_update.email = request.form['email']
@@ -62,8 +62,8 @@ def user(name):
 @login_required
 def dashboard():
     form = UserForm()
-    id = current_user.id
-    name_to_update = Users.query.get_or_404(id)
+    user_id = current_user.id
+    name_to_update = User.query.get_or_404(user_id)
     if request.method == "POST":
         name_to_update.name = request.form['name']
         name_to_update.email = request.form['email']

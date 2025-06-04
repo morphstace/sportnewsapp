@@ -12,13 +12,16 @@
 
 <h1> Add News</h1>
 <br/>
-<form method="POST">
+<form method="POST" enctype="multipart/form-data">
     {{ form.hidden_tag() }}
     {{ form.title.label }}
     {{ form.title(class="form-control") }}
     <br/>
     {{ form.slug.label(class="form-label") }}
     {{ form.slug(class="form-control") }}
+    <br/>
+    {{ form.image.label(class="form-label") }}
+    {{ form.image(class="form-control") }}
     <br/>
     {{ form.content.label(class="form-label") }}
     {{ form.content(class="form-control", rows="5") }}
